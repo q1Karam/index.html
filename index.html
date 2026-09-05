@@ -10,6 +10,8 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         body {
@@ -20,7 +22,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
 
         .game-card {
@@ -28,27 +30,28 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            padding: 25px;
+            padding: 20px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
+            max-width: 100%;
         }
 
         .score-board {
             display: flex;
             justify-content: space-between;
             width: 100%;
-            max-width: 400px;
+            max-width: 360px;
             margin-bottom: 15px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
         }
 
         .score-box {
             background: rgba(0, 0, 0, 0.3);
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -58,11 +61,48 @@
             border-radius: 12px;
             box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(46, 204, 113, 0.2);
             border: 2px solid #1b263b;
+            max-width: 100%;
+            height: auto;
         }
 
-        .controls-hint {
+        /* أزرار التحكم للهواتف */
+        .touch-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
+            width: 200px;
+            height: 200px;
             margin-top: 15px;
-            font-size: 14px;
+        }
+
+        .arrow-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            font-size: 22px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.1s, transform 0.1s;
+            touch-action: manipulation;
+        }
+
+        .arrow-btn:active {
+            background: rgba(46, 204, 113, 0.5);
+            transform: scale(0.92);
+        }
+
+        .btn-up { grid-column: 2; grid-row: 1; }
+        .btn-left { grid-column: 1; grid-row: 2; }
+        .btn-right { grid-column: 3; grid-row: 2; }
+        .btn-down { grid-column: 2; grid-row: 3; }
+
+        .controls-hint {
+            margin-top: 10px;
+            font-size: 13px;
             color: #a0aab2;
         }
 
@@ -73,7 +113,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.85);
-            border-radius: 20px;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -89,18 +129,18 @@
         }
 
         .game-over-title {
-            font-size: 32px;
+            font-size: 30px;
             color: #e74c3c;
             margin-bottom: 10px;
             font-weight: bold;
         }
 
         .restart-btn {
-            margin-top: 20px;
+            margin-top: 15px;
             background: #2ecc71;
             color: #ffffff;
             border: none;
-            padding: 12px 28px;
+            padding: 10px 24px;
             font-size: 16px;
             font-weight: bold;
             border-radius: 8px;
@@ -127,23 +167,31 @@
     </div>
 
     <div class="container-relative">
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <canvas id="gameCanvas" width="360" height="360"></canvas>
         
         <div class="game-over-overlay" id="gameOverOverlay">
             <div class="game-over-title">خسرت!</div>
-            <p id="finalScoreText" style="font-size: 18px;"></p>
+            <p id="finalScoreText" style="font-size: 16px;"></p>
             <button class="restart-btn" onclick="resetGame()">إعادة اللعب</button>
         </div>
     </div>
 
-    <div class="controls-hint">استخدم أسهم الكيبورد للتحكم بالحركة</div>
+    <!-- أزرار اللمس للتلفون -->
+    <div class="touch-controls">
+        <button class="arrow-btn btn-up" onclick="changeDirection('UP')">▲</button>
+        <button class="arrow-btn btn-left" onclick="changeDirection('LEFT')">◀</button>
+        <button class="arrow-btn btn-right" onclick="changeDirection('RIGHT')">▶</button>
+        <button class="arrow-btn btn-down" onclick="changeDirection('DOWN')">▼</button>
+    </div>
+
+    <div class="controls-hint">استخدم أزرار الشاشة للتلفون أو أسهم الكيبورد للكمبيوتر</div>
 </div>
 
 <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    const gridSize = 20;
+    const gridSize = 18;
     const tileCount = canvas.width / gridSize;
 
     let snake = [];
@@ -221,12 +269,10 @@
     function checkCollision() {
         const head = snake[0];
 
-        // التلامس مع الجدران
         if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
             return true;
         }
 
-        // التلامس مع نفس الحية
         for (let i = 1; i < snake.length; i++) {
             if (head.x === snake[i].x && head.y === snake[i].y) {
                 return true;
@@ -273,7 +319,6 @@
             ctx.save();
 
             if (isHead) {
-                // رسم رأس الحية
                 ctx.fillStyle = "#2ecc71";
                 ctx.shadowColor = "#2ecc71";
                 ctx.shadowBlur = 10;
@@ -288,26 +333,25 @@
                 );
                 ctx.fill();
 
-                // رسم العيون
                 ctx.fillStyle = "#ffffff";
                 let eyeOffsetX = 0;
                 let eyeOffsetY = 0;
 
-                if (dx > 0) { eyeOffsetX = 3; eyeOffsetY = 4; }
-                else if (dx < 0) { eyeOffsetX = -3; eyeOffsetY = 4; }
-                else if (dy > 0) { eyeOffsetX = 4; eyeOffsetY = 3; }
-                else if (dy < 0) { eyeOffsetX = 4; eyeOffsetY = -3; }
+                if (dx > 0) { eyeOffsetX = 3; eyeOffsetY = 3; }
+                else if (dx < 0) { eyeOffsetX = -3; eyeOffsetY = 3; }
+                else if (dy > 0) { eyeOffsetX = 3; eyeOffsetY = 3; }
+                else if (dy < 0) { eyeOffsetX = 3; eyeOffsetY = -3; }
 
                 ctx.beginPath();
                 ctx.arc(
                     segment.x + gridSize / 2 + eyeOffsetX, 
                     segment.y + gridSize / 2 - eyeOffsetY, 
-                    2.5, 0, 2 * Math.PI
+                    2, 0, 2 * Math.PI
                 );
                 ctx.arc(
                     segment.x + gridSize / 2 + eyeOffsetX, 
                     segment.y + gridSize / 2 + eyeOffsetY, 
-                    2.5, 0, 2 * Math.PI
+                    2, 0, 2 * Math.PI
                 );
                 ctx.fill();
 
@@ -316,17 +360,16 @@
                 ctx.arc(
                     segment.x + gridSize / 2 + eyeOffsetX, 
                     segment.y + gridSize / 2 - eyeOffsetY, 
-                    1.2, 0, 2 * Math.PI
+                    1, 0, 2 * Math.PI
                 );
                 ctx.arc(
                     segment.x + gridSize / 2 + eyeOffsetX, 
                     segment.y + gridSize / 2 + eyeOffsetY, 
-                    1.2, 0, 2 * Math.PI
+                    1, 0, 2 * Math.PI
                 );
                 ctx.fill();
 
             } else {
-                // رسم جسم الحية بتدرج دائرائي
                 const progress = index / snake.length;
                 const radius = (gridSize / 2) * (1 - progress * 0.3);
 
@@ -351,7 +394,6 @@
         const centerX = food.x + gridSize / 2;
         const centerY = food.y + gridSize / 2;
 
-        // رسم التفاحة
         ctx.fillStyle = "#e74c3c";
         ctx.shadowColor = "#e74c3c";
         ctx.shadowBlur = 12;
@@ -360,21 +402,27 @@
         ctx.arc(centerX, centerY + 1, gridSize / 2 - 2, 0, 2 * Math.PI);
         ctx.fill();
 
-        // الساق والأوراق
         ctx.shadowBlur = 0;
         ctx.strokeStyle = "#795548";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY - 4);
-        ctx.lineTo(centerX + 2, centerY - 8);
+        ctx.moveTo(centerX, centerY - 3);
+        ctx.lineTo(centerX + 2, centerY - 7);
         ctx.stroke();
 
         ctx.fillStyle = "#2ecc71";
         ctx.beginPath();
-        ctx.arc(centerX + 3, centerY - 7, 2, 0, 2 * Math.PI);
+        ctx.arc(centerX + 3, centerY - 6, 2, 0, 2 * Math.PI);
         ctx.fill();
 
         ctx.restore();
+    }
+
+    function changeDirection(dir) {
+        if (dir === 'UP' && dy === 0) { nextDx = 0; nextDy = -gridSize; }
+        if (dir === 'DOWN' && dy === 0) { nextDx = 0; nextDy = gridSize; }
+        if (dir === 'LEFT' && dx === 0) { nextDx = -gridSize; nextDy = 0; }
+        if (dir === 'RIGHT' && dx === 0) { nextDx = gridSize; nextDy = 0; }
     }
 
     function handleGameOver() {
@@ -391,16 +439,16 @@
     document.addEventListener("keydown", (e) => {
         switch (e.key) {
             case "ArrowUp":
-                if (dy === 0) { nextDx = 0; nextDy = -gridSize; }
+                changeDirection('UP');
                 break;
             case "ArrowDown":
-                if (dy === 0) { nextDx = 0; nextDy = gridSize; }
+                changeDirection('DOWN');
                 break;
             case "ArrowLeft":
-                if (dx === 0) { nextDx = -gridSize; nextDy = 0; }
+                changeDirection('LEFT');
                 break;
             case "ArrowRight":
-                if (dx === 0) { nextDx = gridSize; nextDy = 0; }
+                changeDirection('RIGHT');
                 break;
         }
     });
