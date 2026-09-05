@@ -96,8 +96,8 @@
         }
 
         .btn-up { grid-column: 2; grid-row: 1; }
-        .btn-left { grid-column: 1; grid-row: 2; }
-        .btn-right { grid-column: 3; grid-row: 2; }
+        .btn-right-pos { grid-column: 1; grid-row: 2; } /* مكان الشمال سابقاً */
+        .btn-left-pos { grid-column: 3; grid-row: 2; }  /* مكان اليمين سابقاً */
         .btn-down { grid-column: 2; grid-row: 3; }
 
         .controls-hint {
@@ -176,11 +176,11 @@
         </div>
     </div>
 
-    <!-- أزرار اللمس للتلفون -->
+    <!-- أزرار اللمس للتلفون (تم تبديل اليمين واليسار) -->
     <div class="touch-controls">
         <button class="arrow-btn btn-up" onclick="changeDirection('UP')">▲</button>
-        <button class="arrow-btn btn-left" onclick="changeDirection('LEFT')">◀</button>
-        <button class="arrow-btn btn-right" onclick="changeDirection('RIGHT')">▶</button>
+        <button class="arrow-btn btn-right-pos" onclick="changeDirection('RIGHT')">▶</button>
+        <button class="arrow-btn btn-left-pos" onclick="changeDirection('LEFT')">◀</button>
         <button class="arrow-btn btn-down" onclick="changeDirection('DOWN')">▼</button>
     </div>
 
