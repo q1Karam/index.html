@@ -43,23 +43,23 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            max-width: 360px;
+            max-width: 480px;
             margin-bottom: 15px;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
         }
 
         .score-box {
             background: rgba(0, 0, 0, 0.3);
-            padding: 8px 14px;
-            border-radius: 10px;
+            padding: 10px 18px;
+            border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         canvas {
             background-color: #0d1b2a;
-            border-radius: 12px;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(46, 204, 113, 0.2);
+            border-radius: 16px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 0 20px rgba(46, 204, 113, 0.25);
             border: 2px solid #1b263b;
             max-width: 100%;
             height: auto;
@@ -70,9 +70,9 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 8px;
-            width: 200px;
-            height: 200px;
+            gap: 10px;
+            width: 220px;
+            height: 220px;
             margin-top: 15px;
         }
 
@@ -80,8 +80,8 @@
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #ffffff;
-            font-size: 22px;
-            border-radius: 12px;
+            font-size: 24px;
+            border-radius: 14px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -96,8 +96,8 @@
         }
 
         .btn-up { grid-column: 2; grid-row: 1; }
-        .btn-right-pos { grid-column: 1; grid-row: 2; } /* مكان الشمال سابقاً */
-        .btn-left-pos { grid-column: 3; grid-row: 2; }  /* مكان اليمين سابقاً */
+        .btn-right-pos { grid-column: 1; grid-row: 2; }
+        .btn-left-pos { grid-column: 3; grid-row: 2; }
         .btn-down { grid-column: 2; grid-row: 3; }
 
         .controls-hint {
@@ -113,7 +113,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.85);
-            border-radius: 12px;
+            border-radius: 16px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -129,7 +129,7 @@
         }
 
         .game-over-title {
-            font-size: 30px;
+            font-size: 32px;
             color: #e74c3c;
             margin-bottom: 10px;
             font-weight: bold;
@@ -140,10 +140,10 @@
             background: #2ecc71;
             color: #ffffff;
             border: none;
-            padding: 10px 24px;
-            font-size: 16px;
+            padding: 12px 28px;
+            font-size: 18px;
             font-weight: bold;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             transition: transform 0.2s, background-color 0.2s;
         }
@@ -167,16 +167,17 @@
     </div>
 
     <div class="container-relative">
-        <canvas id="gameCanvas" width="360" height="360"></canvas>
+        <!-- تم تكبير الملعب إلى 480x480 -->
+        <canvas id="gameCanvas" width="480" height="480"></canvas>
         
         <div class="game-over-overlay" id="gameOverOverlay">
             <div class="game-over-title">خسرت!</div>
-            <p id="finalScoreText" style="font-size: 16px;"></p>
+            <p id="finalScoreText" style="font-size: 18px;"></p>
             <button class="restart-btn" onclick="resetGame()">إعادة اللعب</button>
         </div>
     </div>
 
-    <!-- أزرار اللمس للتلفون (تم تبديل اليمين واليسار) -->
+    <!-- أزرار التحكم للهواتف -->
     <div class="touch-controls">
         <button class="arrow-btn btn-up" onclick="changeDirection('UP')">▲</button>
         <button class="arrow-btn btn-right-pos" onclick="changeDirection('RIGHT')">▶</button>
@@ -191,60 +192,87 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    const gridSize = 18;
+    // تم تكبير حجم المربع إلى 32px لتصبح الدودة والتفاحة أضخم وأوضح
+    const gridSize = 32; 
     const tileCount = canvas.width / gridSize;
 
     let snake = [];
+    let prevSnake = [];
     let food = { x: 0, y: 0 };
 
-    let dx = gridSize;
+    let dx = 1;
     let dy = 0;
-    let nextDx = gridSize;
+    let nextDx = 1;
     let nextDy = 0;
 
     let score = 0;
     let highScore = localStorage.getItem("snakeHighScore") || 0;
     document.getElementById("highScore").innerText = highScore;
 
-    let gameInterval;
     let isGameOver = false;
+    let animationFrameId;
+    let lastStepTime = 0;
+    
+    // زمن التأخير للخطوة لتوفير سرعة متوازنة مع النعومة الفائقة
+    const stepInterval = 180; 
+
+    // دالة النعومة السلسة Smooth Step / Smooth Transition
+    function easeInOutQuad(t) {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
 
     function initGame() {
         snake = [
-            { x: 10 * gridSize, y: 10 * gridSize },
-            { x: 9 * gridSize, y: 10 * gridSize },
-            { x: 8 * gridSize, y: 10 * gridSize }
+            { x: 5, y: 7 },
+            { x: 4, y: 7 },
+            { x: 3, y: 7 }
         ];
+        prevSnake = JSON.parse(JSON.stringify(snake));
+
         score = 0;
-        dx = gridSize;
+        dx = 1;
         dy = 0;
-        nextDx = gridSize;
+        nextDx = 1;
         nextDy = 0;
         isGameOver = false;
         document.getElementById("currentScore").innerText = score;
         document.getElementById("gameOverOverlay").classList.remove("active");
         spawnFood();
         
-        if (gameInterval) clearInterval(gameInterval);
-        gameInterval = setInterval(gameLoop, 100);
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        lastStepTime = performance.now();
+        animationFrameId = requestAnimationFrame(gameLoop);
     }
 
-    function gameLoop() {
+    function gameLoop(currentTime) {
         if (isGameOver) return;
 
-        dx = nextDx;
-        dy = nextDy;
+        animationFrameId = requestAnimationFrame(gameLoop);
 
-        moveSnake();
+        let elapsed = currentTime - lastStepTime;
 
-        if (checkCollision()) {
-            handleGameOver();
-            return;
+        if (elapsed >= stepInterval) {
+            lastStepTime = currentTime;
+            elapsed = 0;
+
+            dx = nextDx;
+            dy = nextDy;
+
+            prevSnake = JSON.parse(JSON.stringify(snake));
+            moveSnake();
+
+            if (checkCollision()) {
+                handleGameOver();
+                return;
+            }
         }
+
+        let rawProgress = Math.min(elapsed / stepInterval, 1);
+        let smoothProgress = easeInOutQuad(rawProgress); // انسيابية ناعمة جداً
 
         drawGrid();
         drawFood();
-        drawSnake();
+        drawSmoothSnake(smoothProgress);
     }
 
     function moveSnake() {
@@ -269,7 +297,7 @@
     function checkCollision() {
         const head = snake[0];
 
-        if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+        if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
             return true;
         }
 
@@ -283,8 +311,8 @@
     }
 
     function spawnFood() {
-        food.x = Math.floor(Math.random() * tileCount) * gridSize;
-        food.y = Math.floor(Math.random() * tileCount) * gridSize;
+        food.x = Math.floor(Math.random() * tileCount);
+        food.y = Math.floor(Math.random() * tileCount);
 
         for (let segment of snake) {
             if (segment.x === food.x && segment.y === food.y) {
@@ -298,7 +326,7 @@
         ctx.fillStyle = "#0d1b2a";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.02)";
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
         ctx.lineWidth = 1;
         for (let i = 0; i < canvas.width; i += gridSize) {
             ctx.beginPath();
@@ -313,71 +341,72 @@
         }
     }
 
-    function drawSnake() {
+    function drawSmoothSnake(progress) {
         snake.forEach((segment, index) => {
             const isHead = index === 0;
+
+            let prev = prevSnake[index] || segment;
+            let currentX = (prev.x + (segment.x - prev.x) * progress) * gridSize;
+            let currentY = (prev.y + (segment.y - prev.y) * progress) * gridSize;
+
             ctx.save();
 
             if (isHead) {
                 ctx.fillStyle = "#2ecc71";
                 ctx.shadowColor = "#2ecc71";
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = 15;
 
                 ctx.beginPath();
                 ctx.arc(
-                    segment.x + gridSize / 2, 
-                    segment.y + gridSize / 2, 
-                    gridSize / 2, 
+                    currentX + gridSize / 2, 
+                    currentY + gridSize / 2, 
+                    gridSize / 2 - 1, 
                     0, 
                     2 * Math.PI
                 );
                 ctx.fill();
 
+                // رسم العيون بشكل أكبر وأوضح
                 ctx.fillStyle = "#ffffff";
-                let eyeOffsetX = 0;
-                let eyeOffsetY = 0;
-
-                if (dx > 0) { eyeOffsetX = 3; eyeOffsetY = 3; }
-                else if (dx < 0) { eyeOffsetX = -3; eyeOffsetY = 3; }
-                else if (dy > 0) { eyeOffsetX = 3; eyeOffsetY = 3; }
-                else if (dy < 0) { eyeOffsetX = 3; eyeOffsetY = -3; }
+                let eyeOffsetX = dx * 6;
+                let eyeOffsetY = dy * 6;
 
                 ctx.beginPath();
                 ctx.arc(
-                    segment.x + gridSize / 2 + eyeOffsetX, 
-                    segment.y + gridSize / 2 - eyeOffsetY, 
-                    2, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX + (dy * 4.5), 
+                    currentY + gridSize / 2 + eyeOffsetY + (dx * 4.5), 
+                    3.5, 0, 2 * Math.PI
                 );
                 ctx.arc(
-                    segment.x + gridSize / 2 + eyeOffsetX, 
-                    segment.y + gridSize / 2 + eyeOffsetY, 
-                    2, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX - (dy * 4.5), 
+                    currentY + gridSize / 2 + eyeOffsetY - (dx * 4.5), 
+                    3.5, 0, 2 * Math.PI
                 );
                 ctx.fill();
 
                 ctx.fillStyle = "#000000";
                 ctx.beginPath();
                 ctx.arc(
-                    segment.x + gridSize / 2 + eyeOffsetX, 
-                    segment.y + gridSize / 2 - eyeOffsetY, 
-                    1, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX + (dy * 4.5), 
+                    currentY + gridSize / 2 + eyeOffsetY + (dx * 4.5), 
+                    1.8, 0, 2 * Math.PI
                 );
                 ctx.arc(
-                    segment.x + gridSize / 2 + eyeOffsetX, 
-                    segment.y + gridSize / 2 + eyeOffsetY, 
-                    1, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX - (dy * 4.5), 
+                    currentY + gridSize / 2 + eyeOffsetY - (dx * 4.5), 
+                    1.8, 0, 2 * Math.PI
                 );
                 ctx.fill();
 
             } else {
-                const progress = index / snake.length;
-                const radius = (gridSize / 2) * (1 - progress * 0.3);
+                const headIndexRatio = index / snake.length;
+                const radius = (gridSize / 2 - 1) * (1 - headIndexRatio * 0.22);
 
-                ctx.fillStyle = `hsl(${140 - index * 2}, 70%, ${50 - index * 1}%)`;
+                ctx.fillStyle = `hsl(${140 - index * 3}, 70%, ${50 - index * 1}%)`;
                 ctx.beginPath();
                 ctx.arc(
-                    segment.x + gridSize / 2, 
-                    segment.y + gridSize / 2, 
+                    currentX + gridSize / 2, 
+                    currentY + gridSize / 2, 
                     radius, 
                     0, 
                     2 * Math.PI
@@ -391,43 +420,45 @@
 
     function drawFood() {
         ctx.save();
-        const centerX = food.x + gridSize / 2;
-        const centerY = food.y + gridSize / 2;
+        const centerX = food.x * gridSize + gridSize / 2;
+        const centerY = food.y * gridSize + gridSize / 2;
 
         ctx.fillStyle = "#e74c3c";
         ctx.shadowColor = "#e74c3c";
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 18;
 
+        // رسم التفاحة بشكل أضخم
         ctx.beginPath();
-        ctx.arc(centerX, centerY + 1, gridSize / 2 - 2, 0, 2 * Math.PI);
+        ctx.arc(centerX, centerY + 1, gridSize / 2 - 3, 0, 2 * Math.PI);
         ctx.fill();
 
+        // غصن التفاحة ورقتها
         ctx.shadowBlur = 0;
         ctx.strokeStyle = "#795548";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 2.5;
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY - 3);
-        ctx.lineTo(centerX + 2, centerY - 7);
+        ctx.moveTo(centerX, centerY - 5);
+        ctx.lineTo(centerX + 4, centerY - 12);
         ctx.stroke();
 
         ctx.fillStyle = "#2ecc71";
         ctx.beginPath();
-        ctx.arc(centerX + 3, centerY - 6, 2, 0, 2 * Math.PI);
+        ctx.arc(centerX + 5, centerY - 9, 3.5, 0, 2 * Math.PI);
         ctx.fill();
 
         ctx.restore();
     }
 
     function changeDirection(dir) {
-        if (dir === 'UP' && dy === 0) { nextDx = 0; nextDy = -gridSize; }
-        if (dir === 'DOWN' && dy === 0) { nextDx = 0; nextDy = gridSize; }
-        if (dir === 'LEFT' && dx === 0) { nextDx = -gridSize; nextDy = 0; }
-        if (dir === 'RIGHT' && dx === 0) { nextDx = gridSize; nextDy = 0; }
+        if (dir === 'UP' && dy === 0) { nextDx = 0; nextDy = -1; }
+        if (dir === 'DOWN' && dy === 0) { nextDx = 0; nextDy = 1; }
+        if (dir === 'LEFT' && dx === 0) { nextDx = -1; nextDy = 0; }
+        if (dir === 'RIGHT' && dx === 0) { nextDx = 1; nextDy = 0; }
     }
 
     function handleGameOver() {
         isGameOver = true;
-        clearInterval(gameInterval);
+        cancelAnimationFrame(animationFrameId);
         document.getElementById("finalScoreText").innerText = `مجموع نقاطك: ${score}`;
         document.getElementById("gameOverOverlay").classList.add("active");
     }
