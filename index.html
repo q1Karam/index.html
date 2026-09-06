@@ -18,31 +18,81 @@
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             color: #ffffff;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 10px;
         }
 
+        /* حاوية رئيسية تجمع اللعبة والجدول الجانبي */
+        .main-layout {
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
+            align-items: flex-start;
+            max-width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
         .game-card {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 16px;
+            border-radius: 16px;
+            padding: 14px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            max-width: 100%;
         }
 
-        .player-info {
-            font-size: 14px;
+        /* جدول النتائج على الطرف */
+        .side-leaderboard {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 14px;
+            width: 180px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .leaderboard-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #f1c40f;
+            margin-bottom: 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 6px;
+        }
+
+        .leaderboard-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            padding: 6px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+        }
+
+        .leaderboard-row:last-child {
+            border-bottom: none;
+        }
+
+        .player-name-tag {
             color: #2ecc71;
-            margin-bottom: 8px;
+            font-weight: bold;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 90px;
+        }
+
+        .score-tag {
+            color: #f1c40f;
             font-weight: bold;
         }
 
@@ -51,34 +101,36 @@
             justify-content: space-between;
             width: 100%;
             max-width: 440px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             font-size: 16px;
             font-weight: bold;
         }
 
         .score-box {
             background: rgba(0, 0, 0, 0.3);
-            padding: 8px 14px;
-            border-radius: 10px;
+            padding: 6px 12px;
+            border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
+        /* أبعاد الملعب المطلوبة 440x440 */
         canvas {
             background-color: #0d1b2a;
-            border-radius: 14px;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 0 20px rgba(46, 204, 113, 0.2);
+            border-radius: 12px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8), 0 0 15px rgba(46, 204, 113, 0.15);
             border: 2px solid #1b263b;
             max-width: 100%;
             height: auto;
         }
 
+        /* أزرار التحكم للأجهزة اللوحية والموبايل */
         .touch-controls {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
             gap: 8px;
-            width: 210px;
-            height: 210px;
+            width: 200px;
+            height: 200px;
             margin-top: 12px;
         }
 
@@ -86,8 +138,8 @@
             background: rgba(255, 255, 255, 0.12);
             border: 1px solid rgba(255, 255, 255, 0.25);
             color: #ffffff;
-            font-size: 24px;
-            border-radius: 14px;
+            font-size: 22px;
+            border-radius: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -106,12 +158,6 @@
         .btn-left-pos { grid-column: 3; grid-row: 2; }
         .btn-down { grid-column: 2; grid-row: 3; }
 
-        .controls-hint {
-            margin-top: 10px;
-            font-size: 13px;
-            color: #a0aab2;
-        }
-
         /* نافذة إدخال الاسم والنتيجة */
         .modal-overlay {
             position: absolute;
@@ -119,8 +165,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.88);
-            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -129,7 +175,7 @@
             pointer-events: none;
             transition: opacity 0.2s ease;
             z-index: 10;
-            padding: 20px;
+            padding: 15px;
         }
 
         .modal-overlay.active {
@@ -138,22 +184,22 @@
         }
 
         .modal-title {
-            font-size: 24px;
+            font-size: 22px;
             color: #2ecc71;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             font-weight: bold;
         }
 
         .name-input {
             width: 80%;
-            padding: 10px 15px;
-            border-radius: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
             border: 1px solid #2ecc71;
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
-            font-size: 16px;
+            font-size: 15px;
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             outline: none;
         }
 
@@ -161,10 +207,10 @@
             background: #2ecc71;
             color: #ffffff;
             border: none;
-            padding: 10px 26px;
-            font-size: 18px;
+            padding: 8px 22px;
+            font-size: 16px;
             font-weight: bold;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
             transition: transform 0.1s, background-color 0.1s;
         }
@@ -181,46 +227,60 @@
 </head>
 <body>
 
-<div class="game-card">
-    <div class="player-info" id="playerGreeting">أهلاً بك!</div>
-    <div class="score-board">
-        <div class="score-box">النقاط: <span id="currentScore" style="color:#2ecc71;">0</span></div>
-        <div class="score-box">أعلى نتيجة: <span id="highScore" style="color:#f1c40f;">0</span></div>
-    </div>
+<div class="main-layout">
 
-    <div class="container-relative">
-        <canvas id="gameCanvas" width="440" height="440"></canvas>
-        
-        <!-- نافذة طلب الاسم لأول مرة -->
-        <div class="modal-overlay" id="nameModalOverlay">
-            <div class="modal-title">مرحباً بك!</div>
-            <p style="margin-bottom: 15px; font-size: 14px;">أدخل اسمك لتسجيل نتائجك الخاصة بهذا الجهاز:</p>
-            <input type="text" id="playerNameInput" class="name-input" placeholder="اكتب اسمك هنا..." maxlength="15">
-            <button class="restart-btn" onclick="savePlayerName()">ابدأ اللعب</button>
+    <!-- كرت اللعبة الأساسي -->
+    <div class="game-card">
+        <div class="score-board">
+            <div class="score-box">النقاط: <span id="currentScore" style="color:#2ecc71;">0</span></div>
+            <div class="score-box">أعلى نتيجة: <span id="highScore" style="color:#f1c40f;">0</span></div>
         </div>
 
-        <!-- نافذة انتهاء اللعبة -->
-        <div class="modal-overlay" id="gameOverOverlay">
-            <div class="modal-title" style="color:#e74c3c;">خسرت!</div>
-            <p id="finalScoreText" style="font-size: 18px; margin-bottom: 15px;"></p>
-            <button class="restart-btn" onclick="resetGame()">إعادة اللعب</button>
+        <div class="container-relative">
+            <!-- أبعاد الملعب 440x440 -->
+            <canvas id="gameCanvas" width="440" height="440"></canvas>
+            
+            <!-- نافذة طلب الاسم عند الدخول لأول مرة -->
+            <div class="modal-overlay" id="nameModalOverlay">
+                <div class="modal-title">أهلاً بك!</div>
+                <p style="margin-bottom: 10px; font-size: 14px;">أدخل اسمك لحفظ نتائجك:</p>
+                <input type="text" id="playerNameInput" class="name-input" placeholder="اكتب اسمك..." maxlength="12">
+                <button class="restart-btn" onclick="savePlayerName()">ابدأ اللعب</button>
+            </div>
+
+            <!-- نافذة الخسارة -->
+            <div class="modal-overlay" id="gameOverOverlay">
+                <div class="modal-title" style="color:#e74c3c;">خسرت!</div>
+                <p id="finalScoreText" style="font-size: 16px; margin-bottom: 12px;"></p>
+                <button class="restart-btn" onclick="resetGame()">إعادة اللعب</button>
+            </div>
+        </div>
+
+        <!-- أزرار التحكم -->
+        <div class="touch-controls">
+            <button class="arrow-btn btn-up" id="btnUp">▲</button>
+            <button class="arrow-btn btn-right-pos" id="btnRight">▶</button>
+            <button class="arrow-btn btn-left-pos" id="btnLeft">◀</button>
+            <button class="arrow-btn btn-down" id="btnDown">▼</button>
         </div>
     </div>
 
-    <div class="touch-controls">
-        <button class="arrow-btn btn-up" id="btnUp">▲</button>
-        <button class="arrow-btn btn-right-pos" id="btnRight">▶</button>
-        <button class="arrow-btn btn-left-pos" id="btnLeft">◀</button>
-        <button class="arrow-btn btn-down" id="btnDown">▼</button>
+    <!-- جدول النتائج الصغير على الطرف -->
+    <div class="side-leaderboard">
+        <div class="leaderboard-title">🏆 جدول النتائج</div>
+        <div class="leaderboard-row">
+            <span class="player-name-tag" id="lbPlayerName">---</span>
+            <span class="score-tag" id="lbHighScore">0</span>
+        </div>
     </div>
 
-    <div class="controls-hint">استخدم أزرار الشاشة للتلفون أو أسهم الكيبورد للكمبيوتر</div>
 </div>
 
 <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
+    // حجم المربع المطلوب 32px
     const gridSize = 32; 
     const tileCount = canvas.width / gridSize;
 
@@ -241,25 +301,18 @@
     let isGameOver = false;
     let animationFrameId;
     let lastStepTime = 0;
-    const stepInterval = 150; 
+    const stepInterval = 140; 
 
-    // إدارة تعريف اللاعب وحفظ معلوماته بذاكرة التلفون
+    // إعداد ملف اللاعب وجدول النتائج الجانبي
     function initPlayerProfile() {
-        let storedDeviceId = localStorage.getItem("snake_device_id");
-        if (!storedDeviceId) {
-            // توليد معرف فريد للتلفون بديل الـ IP
-            storedDeviceId = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now();
-            localStorage.setItem("snake_device_id", storedDeviceId);
-        }
-
         playerName = localStorage.getItem("snake_player_name");
         highScore = localStorage.getItem("snake_high_score") || 0;
-        document.getElementById("highScore").innerText = highScore;
+
+        updateLeaderboardUI();
 
         if (!playerName) {
             document.getElementById("nameModalOverlay").classList.add("active");
         } else {
-            document.getElementById("playerGreeting").innerText = `اللاعب: ${playerName}`;
             initGame();
         }
     }
@@ -270,13 +323,19 @@
         if (val !== "") {
             playerName = val;
         } else {
-            playerName = "لاعب " + Math.floor(1000 + Math.random() * 9000);
+            playerName = "لاعب " + Math.floor(100 + Math.random() * 900);
         }
 
         localStorage.setItem("snake_player_name", playerName);
-        document.getElementById("playerGreeting").innerText = `اللاعب: ${playerName}`;
         document.getElementById("nameModalOverlay").classList.remove("active");
+        updateLeaderboardUI();
         initGame();
+    }
+
+    function updateLeaderboardUI() {
+        document.getElementById("highScore").innerText = highScore;
+        document.getElementById("lbPlayerName").innerText = playerName || "غير محدد";
+        document.getElementById("lbHighScore").innerText = highScore + " نقطة";
     }
 
     function easeInOutQuad(t) {
@@ -285,9 +344,9 @@
 
     function initGame() {
         snake = [
-            { x: 5, y: 6 },
-            { x: 4, y: 6 },
-            { x: 3, y: 6 }
+            { x: 5, y: 5 },
+            { x: 4, y: 5 },
+            { x: 3, y: 5 }
         ];
         prevSnake = JSON.parse(JSON.stringify(snake));
 
@@ -349,7 +408,7 @@
             if (score > highScore) {
                 highScore = score;
                 localStorage.setItem("snake_high_score", highScore);
-                document.getElementById("highScore").innerText = highScore;
+                updateLeaderboardUI();
             }
             spawnFood();
         } else {
@@ -419,7 +478,7 @@
             if (isHead) {
                 ctx.fillStyle = "#2ecc71";
                 ctx.shadowColor = "#2ecc71";
-                ctx.shadowBlur = 14;
+                ctx.shadowBlur = 12;
 
                 ctx.beginPath();
                 ctx.arc(
@@ -432,33 +491,33 @@
                 ctx.fill();
 
                 ctx.fillStyle = "#ffffff";
-                let eyeOffsetX = dx * 6;
-                let eyeOffsetY = dy * 6;
+                let eyeOffsetX = dx * 5;
+                let eyeOffsetY = dy * 5;
 
                 ctx.beginPath();
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX + (dy * 4.5), 
-                    currentY + gridSize / 2 + eyeOffsetY + (dx * 4.5), 
-                    3.5, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX + (dy * 4), 
+                    currentY + gridSize / 2 + eyeOffsetY + (dx * 4), 
+                    3, 0, 2 * Math.PI
                 );
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX - (dy * 4.5), 
-                    currentY + gridSize / 2 + eyeOffsetY - (dx * 4.5), 
-                    3.5, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX - (dy * 4), 
+                    currentY + gridSize / 2 + eyeOffsetY - (dx * 4), 
+                    3, 0, 2 * Math.PI
                 );
                 ctx.fill();
 
                 ctx.fillStyle = "#000000";
                 ctx.beginPath();
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX + (dy * 4.5), 
-                    currentY + gridSize / 2 + eyeOffsetY + (dx * 4.5), 
-                    1.8, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX + (dy * 4), 
+                    currentY + gridSize / 2 + eyeOffsetY + (dx * 4), 
+                    1.5, 0, 2 * Math.PI
                 );
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX - (dy * 4.5), 
-                    currentY + gridSize / 2 + eyeOffsetY - (dx * 4.5), 
-                    1.8, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX - (dy * 4), 
+                    currentY + gridSize / 2 + eyeOffsetY - (dx * 4), 
+                    1.5, 0, 2 * Math.PI
                 );
                 ctx.fill();
 
@@ -489,23 +548,23 @@
 
         ctx.fillStyle = "#e74c3c";
         ctx.shadowColor = "#e74c3c";
-        ctx.shadowBlur = 16;
+        ctx.shadowBlur = 14;
 
         ctx.beginPath();
-        ctx.arc(centerX, centerY + 1, gridSize / 2 - 3, 0, 2 * Math.PI);
+        ctx.arc(centerX, centerY + 1, gridSize / 2 - 2.5, 0, 2 * Math.PI);
         ctx.fill();
 
         ctx.shadowBlur = 0;
         ctx.strokeStyle = "#795548";
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(centerX, centerY - 5);
-        ctx.lineTo(centerX + 4, centerY - 12);
+        ctx.lineTo(centerX + 3, centerY - 10);
         ctx.stroke();
 
         ctx.fillStyle = "#2ecc71";
         ctx.beginPath();
-        ctx.arc(centerX + 5, centerY - 9, 3.5, 0, 2 * Math.PI);
+        ctx.arc(centerX + 4, centerY - 8, 3, 0, 2 * Math.PI);
         ctx.fill();
 
         ctx.restore();
@@ -523,7 +582,7 @@
     function handleGameOver() {
         isGameOver = true;
         cancelAnimationFrame(animationFrameId);
-        document.getElementById("finalScoreText").innerText = `${playerName}، مجموع نقاطك: ${score}`;
+        document.getElementById("finalScoreText").innerText = `${playerName}، نقاطك: ${score}`;
         document.getElementById("gameOverOverlay").classList.add("active");
     }
 
@@ -563,7 +622,6 @@
         }
     });
 
-    // بدء تشغيل نظام الملف الشخصي
     initPlayerProfile();
 </script>
 
