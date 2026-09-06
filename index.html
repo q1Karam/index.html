@@ -39,19 +39,26 @@
             max-width: 100%;
         }
 
+        .player-info {
+            font-size: 14px;
+            color: #2ecc71;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
         .score-board {
             display: flex;
             justify-content: space-between;
             width: 100%;
             max-width: 440px;
             margin-bottom: 12px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
         }
 
         .score-box {
             background: rgba(0, 0, 0, 0.3);
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -65,7 +72,6 @@
             height: auto;
         }
 
-        /* أزرار التحكم للهواتف بلمس أسرع وأساس الاستجابة */
         .touch-controls {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -106,13 +112,14 @@
             color: #a0aab2;
         }
 
-        .game-over-overlay {
+        /* نافذة إدخال الاسم والنتيجة */
+        .modal-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.88);
             border-radius: 14px;
             display: flex;
             flex-direction: column;
@@ -121,22 +128,36 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s ease;
+            z-index: 10;
+            padding: 20px;
         }
 
-        .game-over-overlay.active {
+        .modal-overlay.active {
             opacity: 1;
             pointer-events: all;
         }
 
-        .game-over-title {
-            font-size: 30px;
-            color: #e74c3c;
-            margin-bottom: 10px;
+        .modal-title {
+            font-size: 24px;
+            color: #2ecc71;
+            margin-bottom: 12px;
             font-weight: bold;
         }
 
+        .name-input {
+            width: 80%;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #2ecc71;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 15px;
+            outline: none;
+        }
+
         .restart-btn {
-            margin-top: 12px;
             background: #2ecc71;
             color: #ffffff;
             border: none;
@@ -161,23 +182,31 @@
 <body>
 
 <div class="game-card">
+    <div class="player-info" id="playerGreeting">أهلاً بك!</div>
     <div class="score-board">
         <div class="score-box">النقاط: <span id="currentScore" style="color:#2ecc71;">0</span></div>
         <div class="score-box">أعلى نتيجة: <span id="highScore" style="color:#f1c40f;">0</span></div>
     </div>
 
     <div class="container-relative">
-        <!-- أبعاد الملعب متوسطة ومناسبة 440x440 -->
         <canvas id="gameCanvas" width="440" height="440"></canvas>
         
-        <div class="game-over-overlay" id="gameOverOverlay">
-            <div class="game-over-title">خسرت!</div>
-            <p id="finalScoreText" style="font-size: 18px;"></p>
+        <!-- نافذة طلب الاسم لأول مرة -->
+        <div class="modal-overlay" id="nameModalOverlay">
+            <div class="modal-title">مرحباً بك!</div>
+            <p style="margin-bottom: 15px; font-size: 14px;">أدخل اسمك لتسجيل نتائجك الخاصة بهذا الجهاز:</p>
+            <input type="text" id="playerNameInput" class="name-input" placeholder="اكتب اسمك هنا..." maxlength="15">
+            <button class="restart-btn" onclick="savePlayerName()">ابدأ اللعب</button>
+        </div>
+
+        <!-- نافذة انتهاء اللعبة -->
+        <div class="modal-overlay" id="gameOverOverlay">
+            <div class="modal-title" style="color:#e74c3c;">خسرت!</div>
+            <p id="finalScoreText" style="font-size: 18px; margin-bottom: 15px;"></p>
             <button class="restart-btn" onclick="resetGame()">إعادة اللعب</button>
         </div>
     </div>
 
-    <!-- أزرار التحكم للأجهزة اللوحية والموبايل -->
     <div class="touch-controls">
         <button class="arrow-btn btn-up" id="btnUp">▲</button>
         <button class="arrow-btn btn-right-pos" id="btnRight">▶</button>
@@ -192,7 +221,6 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    // تم تعديل حجم المربع إلى 32px لتكون أصغر وأنسب من العرض السابق
     const gridSize = 32; 
     const tileCount = canvas.width / gridSize;
 
@@ -204,18 +232,52 @@
     let dy = 0;
     let nextDx = 1;
     let nextDy = 0;
-    let directionChangedThisStep = false; // حماية من الضغطات المتعددة السريعة بنفس الخطوة
+    let directionChangedThisStep = false;
 
     let score = 0;
-    let highScore = localStorage.getItem("snakeHighScore") || 0;
-    document.getElementById("highScore").innerText = highScore;
+    let playerName = "";
+    let highScore = 0;
 
     let isGameOver = false;
     let animationFrameId;
     let lastStepTime = 0;
-    
-    // سرعة خطوة مناسبة وسريعة
     const stepInterval = 150; 
+
+    // إدارة تعريف اللاعب وحفظ معلوماته بذاكرة التلفون
+    function initPlayerProfile() {
+        let storedDeviceId = localStorage.getItem("snake_device_id");
+        if (!storedDeviceId) {
+            // توليد معرف فريد للتلفون بديل الـ IP
+            storedDeviceId = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now();
+            localStorage.setItem("snake_device_id", storedDeviceId);
+        }
+
+        playerName = localStorage.getItem("snake_player_name");
+        highScore = localStorage.getItem("snake_high_score") || 0;
+        document.getElementById("highScore").innerText = highScore;
+
+        if (!playerName) {
+            document.getElementById("nameModalOverlay").classList.add("active");
+        } else {
+            document.getElementById("playerGreeting").innerText = `اللاعب: ${playerName}`;
+            initGame();
+        }
+    }
+
+    function savePlayerName() {
+        const input = document.getElementById("playerNameInput");
+        const val = input.value.trim();
+        if (val !== "") {
+            playerName = val;
+        } else {
+            playerName = "لاعب " + Math.floor(1000 + Math.random() * 9000);
+        }
+
+        localStorage.setItem("snake_player_name", playerName);
+        document.getElementById("playerGreeting").innerText = `اللاعب: ${playerName}`;
+        document.getElementById("nameModalOverlay").classList.remove("active");
+        initGame();
+    }
 
     function easeInOutQuad(t) {
         return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
@@ -286,7 +348,7 @@
             document.getElementById("currentScore").innerText = score;
             if (score > highScore) {
                 highScore = score;
-                localStorage.setItem("snakeHighScore", highScore);
+                localStorage.setItem("snake_high_score", highScore);
                 document.getElementById("highScore").innerText = highScore;
             }
             spawnFood();
@@ -449,7 +511,6 @@
         ctx.restore();
     }
 
-    // دالة تغيير الاتجاه الفورية
     function changeDirection(dir) {
         if (directionChangedThisStep) return;
 
@@ -462,7 +523,7 @@
     function handleGameOver() {
         isGameOver = true;
         cancelAnimationFrame(animationFrameId);
-        document.getElementById("finalScoreText").innerText = `مجموع نقاطك: ${score}`;
+        document.getElementById("finalScoreText").innerText = `${playerName}، مجموع نقاطك: ${score}`;
         document.getElementById("gameOverOverlay").classList.add("active");
     }
 
@@ -470,7 +531,6 @@
         initGame();
     }
 
-    // إضافة استجابة اللمس الفورية دون انتظار تأخير الضغطة للمستعرض
     function bindTouchButton(id, dir) {
         const btn = document.getElementById(id);
         const trigger = (e) => {
@@ -503,7 +563,8 @@
         }
     });
 
-    initGame();
+    // بدء تشغيل نظام الملف الشخصي
+    initPlayerProfile();
 </script>
 
 </body>
