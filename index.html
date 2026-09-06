@@ -30,7 +30,7 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            padding: 20px;
+            padding: 16px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
             text-align: center;
             display: flex;
@@ -43,56 +43,56 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            max-width: 560px;
-            margin-bottom: 15px;
-            font-size: 20px;
+            max-width: 440px;
+            margin-bottom: 12px;
+            font-size: 18px;
             font-weight: bold;
         }
 
         .score-box {
             background: rgba(0, 0, 0, 0.3);
-            padding: 12px 20px;
-            border-radius: 12px;
+            padding: 8px 16px;
+            border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         canvas {
             background-color: #0d1b2a;
-            border-radius: 18px;
-            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8), 0 0 25px rgba(46, 204, 113, 0.25);
-            border: 3px solid #1b263b;
+            border-radius: 14px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 0 20px rgba(46, 204, 113, 0.2);
+            border: 2px solid #1b263b;
             max-width: 100%;
             height: auto;
         }
 
-        /* أزرار التحكم للهواتف */
+        /* أزرار التحكم للهواتف بلمس أسرع وأساس الاستجابة */
         .touch-controls {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 12px;
-            width: 240px;
-            height: 240px;
-            margin-top: 15px;
+            gap: 8px;
+            width: 210px;
+            height: 210px;
+            margin-top: 12px;
         }
 
         .arrow-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             color: #ffffff;
-            font-size: 26px;
-            border-radius: 16px;
+            font-size: 24px;
+            border-radius: 14px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            transition: background 0.1s, transform 0.1s;
+            transition: background 0.05s, transform 0.05s;
             touch-action: manipulation;
         }
 
         .arrow-btn:active {
-            background: rgba(46, 204, 113, 0.5);
-            transform: scale(0.92);
+            background: rgba(46, 204, 113, 0.6);
+            transform: scale(0.90);
         }
 
         .btn-up { grid-column: 2; grid-row: 1; }
@@ -101,8 +101,8 @@
         .btn-down { grid-column: 2; grid-row: 3; }
 
         .controls-hint {
-            margin-top: 12px;
-            font-size: 14px;
+            margin-top: 10px;
+            font-size: 13px;
             color: #a0aab2;
         }
 
@@ -113,14 +113,14 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.85);
-            border-radius: 18px;
+            border-radius: 14px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
         }
 
         .game-over-overlay.active {
@@ -129,23 +129,23 @@
         }
 
         .game-over-title {
-            font-size: 36px;
+            font-size: 30px;
             color: #e74c3c;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             font-weight: bold;
         }
 
         .restart-btn {
-            margin-top: 15px;
+            margin-top: 12px;
             background: #2ecc71;
             color: #ffffff;
             border: none;
-            padding: 14px 32px;
-            font-size: 20px;
+            padding: 10px 26px;
+            font-size: 18px;
             font-weight: bold;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s;
+            transition: transform 0.1s, background-color 0.1s;
         }
 
         .restart-btn:hover {
@@ -167,22 +167,22 @@
     </div>
 
     <div class="container-relative">
-        <!-- تم تكبير أبعاد الملعب الكلية إلى 560x560 -->
-        <canvas id="gameCanvas" width="560" height="560"></canvas>
+        <!-- أبعاد الملعب متوسطة ومناسبة 440x440 -->
+        <canvas id="gameCanvas" width="440" height="440"></canvas>
         
         <div class="game-over-overlay" id="gameOverOverlay">
             <div class="game-over-title">خسرت!</div>
-            <p id="finalScoreText" style="font-size: 20px;"></p>
+            <p id="finalScoreText" style="font-size: 18px;"></p>
             <button class="restart-btn" onclick="resetGame()">إعادة اللعب</button>
         </div>
     </div>
 
-    <!-- أزرار التحكم للهواتف -->
+    <!-- أزرار التحكم للأجهزة اللوحية والموبايل -->
     <div class="touch-controls">
-        <button class="arrow-btn btn-up" onclick="changeDirection('UP')">▲</button>
-        <button class="arrow-btn btn-right-pos" onclick="changeDirection('RIGHT')">▶</button>
-        <button class="arrow-btn btn-left-pos" onclick="changeDirection('LEFT')">◀</button>
-        <button class="arrow-btn btn-down" onclick="changeDirection('DOWN')">▼</button>
+        <button class="arrow-btn btn-up" id="btnUp">▲</button>
+        <button class="arrow-btn btn-right-pos" id="btnRight">▶</button>
+        <button class="arrow-btn btn-left-pos" id="btnLeft">◀</button>
+        <button class="arrow-btn btn-down" id="btnDown">▼</button>
     </div>
 
     <div class="controls-hint">استخدم أزرار الشاشة للتلفون أو أسهم الكيبورد للكمبيوتر</div>
@@ -192,8 +192,8 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    // تم تكبير حجم المربع بشكل ضخم إلى 40px
-    const gridSize = 40; 
+    // تم تعديل حجم المربع إلى 32px لتكون أصغر وأنسب من العرض السابق
+    const gridSize = 32; 
     const tileCount = canvas.width / gridSize;
 
     let snake = [];
@@ -204,6 +204,7 @@
     let dy = 0;
     let nextDx = 1;
     let nextDy = 0;
+    let directionChangedThisStep = false; // حماية من الضغطات المتعددة السريعة بنفس الخطوة
 
     let score = 0;
     let highScore = localStorage.getItem("snakeHighScore") || 0;
@@ -213,8 +214,8 @@
     let animationFrameId;
     let lastStepTime = 0;
     
-    // سرعة الحركة مع الحفاظ على النعومة الفائقة
-    const stepInterval = 170; 
+    // سرعة خطوة مناسبة وسريعة
+    const stepInterval = 150; 
 
     function easeInOutQuad(t) {
         return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
@@ -222,9 +223,9 @@
 
     function initGame() {
         snake = [
-            { x: 5, y: 7 },
-            { x: 4, y: 7 },
-            { x: 3, y: 7 }
+            { x: 5, y: 6 },
+            { x: 4, y: 6 },
+            { x: 3, y: 6 }
         ];
         prevSnake = JSON.parse(JSON.stringify(snake));
 
@@ -233,7 +234,9 @@
         dy = 0;
         nextDx = 1;
         nextDy = 0;
+        directionChangedThisStep = false;
         isGameOver = false;
+
         document.getElementById("currentScore").innerText = score;
         document.getElementById("gameOverOverlay").classList.remove("active");
         spawnFood();
@@ -256,6 +259,7 @@
 
             dx = nextDx;
             dy = nextDy;
+            directionChangedThisStep = false;
 
             prevSnake = JSON.parse(JSON.stringify(snake));
             moveSnake();
@@ -325,9 +329,8 @@
         ctx.fillStyle = "#0d1b2a";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // خطوط الشبكة المربّعة أصبحت أوضح وأكبر
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
+        ctx.lineWidth = 1;
         for (let i = 0; i < canvas.width; i += gridSize) {
             ctx.beginPath();
             ctx.moveTo(i, 0);
@@ -354,9 +357,8 @@
             if (isHead) {
                 ctx.fillStyle = "#2ecc71";
                 ctx.shadowColor = "#2ecc71";
-                ctx.shadowBlur = 18;
+                ctx.shadowBlur = 14;
 
-                // رأس الدودة ضخم
                 ctx.beginPath();
                 ctx.arc(
                     currentX + gridSize / 2, 
@@ -367,35 +369,34 @@
                 );
                 ctx.fill();
 
-                // عيون أضخم وأوضح
                 ctx.fillStyle = "#ffffff";
-                let eyeOffsetX = dx * 8;
-                let eyeOffsetY = dy * 8;
+                let eyeOffsetX = dx * 6;
+                let eyeOffsetY = dy * 6;
 
                 ctx.beginPath();
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX + (dy * 6), 
-                    currentY + gridSize / 2 + eyeOffsetY + (dx * 6), 
-                    4.5, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX + (dy * 4.5), 
+                    currentY + gridSize / 2 + eyeOffsetY + (dx * 4.5), 
+                    3.5, 0, 2 * Math.PI
                 );
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX - (dy * 6), 
-                    currentY + gridSize / 2 + eyeOffsetY - (dx * 6), 
-                    4.5, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX - (dy * 4.5), 
+                    currentY + gridSize / 2 + eyeOffsetY - (dx * 4.5), 
+                    3.5, 0, 2 * Math.PI
                 );
                 ctx.fill();
 
                 ctx.fillStyle = "#000000";
                 ctx.beginPath();
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX + (dy * 6), 
-                    currentY + gridSize / 2 + eyeOffsetY + (dx * 6), 
-                    2.2, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX + (dy * 4.5), 
+                    currentY + gridSize / 2 + eyeOffsetY + (dx * 4.5), 
+                    1.8, 0, 2 * Math.PI
                 );
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX - (dy * 6), 
-                    currentY + gridSize / 2 + eyeOffsetY - (dx * 6), 
-                    2.2, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX - (dy * 4.5), 
+                    currentY + gridSize / 2 + eyeOffsetY - (dx * 4.5), 
+                    1.8, 0, 2 * Math.PI
                 );
                 ctx.fill();
 
@@ -426,35 +427,36 @@
 
         ctx.fillStyle = "#e74c3c";
         ctx.shadowColor = "#e74c3c";
-        ctx.shadowBlur = 22;
+        ctx.shadowBlur = 16;
 
-        // رسم التفاحة بأبعاد كبيرة للغاية
         ctx.beginPath();
         ctx.arc(centerX, centerY + 1, gridSize / 2 - 3, 0, 2 * Math.PI);
         ctx.fill();
 
-        // ساق وساق ورقة التفاحة
         ctx.shadowBlur = 0;
         ctx.strokeStyle = "#795548";
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2.5;
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY - 6);
-        ctx.lineTo(centerX + 5, centerY - 15);
+        ctx.moveTo(centerX, centerY - 5);
+        ctx.lineTo(centerX + 4, centerY - 12);
         ctx.stroke();
 
         ctx.fillStyle = "#2ecc71";
         ctx.beginPath();
-        ctx.arc(centerX + 6, centerY - 11, 4.5, 0, 2 * Math.PI);
+        ctx.arc(centerX + 5, centerY - 9, 3.5, 0, 2 * Math.PI);
         ctx.fill();
 
         ctx.restore();
     }
 
+    // دالة تغيير الاتجاه الفورية
     function changeDirection(dir) {
-        if (dir === 'UP' && dy === 0) { nextDx = 0; nextDy = -1; }
-        if (dir === 'DOWN' && dy === 0) { nextDx = 0; nextDy = 1; }
-        if (dir === 'LEFT' && dx === 0) { nextDx = -1; nextDy = 0; }
-        if (dir === 'RIGHT' && dx === 0) { nextDx = 1; nextDy = 0; }
+        if (directionChangedThisStep) return;
+
+        if (dir === 'UP' && dy === 0) { nextDx = 0; nextDy = -1; directionChangedThisStep = true; }
+        if (dir === 'DOWN' && dy === 0) { nextDx = 0; nextDy = 1; directionChangedThisStep = true; }
+        if (dir === 'LEFT' && dx === 0) { nextDx = -1; nextDy = 0; directionChangedThisStep = true; }
+        if (dir === 'RIGHT' && dx === 0) { nextDx = 1; nextDy = 0; directionChangedThisStep = true; }
     }
 
     function handleGameOver() {
@@ -467,6 +469,22 @@
     function resetGame() {
         initGame();
     }
+
+    // إضافة استجابة اللمس الفورية دون انتظار تأخير الضغطة للمستعرض
+    function bindTouchButton(id, dir) {
+        const btn = document.getElementById(id);
+        const trigger = (e) => {
+            e.preventDefault();
+            changeDirection(dir);
+        };
+        btn.addEventListener("touchstart", trigger, { passive: false });
+        btn.addEventListener("mousedown", trigger);
+    }
+
+    bindTouchButton("btnUp", 'UP');
+    bindTouchButton("btnDown", 'DOWN');
+    bindTouchButton("btnLeft", 'LEFT');
+    bindTouchButton("btnRight", 'RIGHT');
 
     document.addEventListener("keydown", (e) => {
         switch (e.key) {
