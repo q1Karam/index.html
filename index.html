@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة الحية الكلاسيكية</title>
+    <title>لعبة الحية الكلاسيكية - أونلاين</title>
+    
+    <!-- مكتبات Firebase للحفظ السحابي وتحديث الجدول بين جميع اللاعبين -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -24,7 +30,6 @@
             padding: 10px;
         }
 
-        /* نافذة الإدخال الفورية فور فتح اللعبة */
         .welcome-screen {
             position: fixed;
             top: 0;
@@ -94,7 +99,6 @@
             background: #27ae60;
         }
 
-        /* حاوية اللعبة والجدول */
         .main-layout {
             display: flex;
             flex-direction: row;
@@ -118,15 +122,16 @@
             align-items: center;
         }
 
-        /* جدول النتائج الجانبي */
         .side-leaderboard {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
             padding: 14px;
-            width: 190px;
+            width: 220px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            max-height: 560px;
+            overflow-y: auto;
         }
 
         .leaderboard-title {
@@ -154,7 +159,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            max-width: 100px;
+            max-width: 110px;
         }
 
         .score-tag {
@@ -162,7 +167,6 @@
             font-weight: bold;
         }
 
-        /* شريط النتيجة العلوي أصلح كبيراً ليتسع لاسم اللاعب */
         .score-board {
             display: flex;
             justify-content: space-between;
@@ -184,7 +188,6 @@
             gap: 6px;
         }
 
-        /* تكبير حجم ساحة اللعبة إلى 560x560 لمسافات أكبر */
         canvas {
             background-color: #0d1b2a;
             border-radius: 12px;
@@ -259,11 +262,10 @@
 </head>
 <body>
 
-<!-- شاشة إدخال الاسم الفورية فور فتح اللعبة -->
 <div class="welcome-screen" id="welcomeScreen">
     <div class="welcome-box">
         <div class="welcome-title">مرحباً بك! 🐍</div>
-        <div class="welcome-desc">أدخل اسمك أولاً لبدء اللعبة وتسجيل نتائجك:</div>
+        <div class="welcome-desc">أدخل اسمك لحفظ نقاطك وتنافس في الجدول العالم العام:</div>
         <input type="text" id="playerNameInput" class="name-input" placeholder="اكتب اسمك هنا..." maxlength="12">
         <button class="start-btn" onclick="submitNameAndStart()">دخول واللعب</button>
     </div>
@@ -272,17 +274,15 @@
 <div class="main-layout">
 
     <div class="game-card">
-        <!-- شريط النقاط يُظهر الاسم بجانب أعلى سكور -->
         <div class="score-board">
             <div class="score-box">النقاط: <span id="currentScore" style="color:#2ecc71;">0</span></div>
             <div class="score-box">
-                أعلى سكور (<span id="topPlayerNameDisplay" style="color:#2ecc71;">---</span>): 
+                أعلى سكور لك (<span id="topPlayerNameDisplay" style="color:#2ecc71;">---</span>): 
                 <span id="highScore" style="color:#f1c40f;">0</span>
             </div>
         </div>
 
         <div class="container-relative">
-            <!-- مساحة اللعبة المكبرة 560x560 -->
             <canvas id="gameCanvas" width="560" height="560"></canvas>
             
             <div class="modal-overlay" id="gameOverOverlay">
@@ -300,18 +300,37 @@
         </div>
     </div>
 
-    <!-- الجدول الجانبي -->
+    <!-- جدول المتصدرين العالمي لجميع اللاعبين -->
     <div class="side-leaderboard">
-        <div class="leaderboard-title">🏆 جدول النتائج</div>
-        <div class="leaderboard-row">
-            <span class="player-name-tag" id="lbPlayerName">---</span>
-            <span class="score-tag" id="lbHighScore">0</span>
+        <div class="leaderboard-title">🏆 جدول المتصدرين (أونلاين)</div>
+        <div id="leaderboardList">
+            <div style="text-align: center; color:#888; font-size:12px;">جاري تحميل النتائج...</div>
         </div>
     </div>
 
 </div>
 
 <script>
+    // --- إعدادات قاعدة البيانات السحابية (Firebase) ---
+    // لربط اللعبة بسحابتك الخاصة بشكل متكامل، يمكنك استبدال المفاتيح التالية بمفاتيح مشروتك المجاني في Firebase:
+    const firebaseConfig = {
+        apiKey: "AIzaSyDemoKeyReplaceWithYours",
+        authDomain: "snake-game-demo.firebaseapp.com",
+        databaseURL: "https://snake-game-demo-default-rtdb.firebaseio.com",
+        projectId: "snake-game-demo",
+        storageBucket: "snake-game-demo.appspot.com",
+        messagingSenderId: "1234567890",
+        appId: "1:1234567890:web:demo"
+    };
+
+    let database = null;
+    try {
+        firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+    } catch(e) {
+        console.log("Firebase initialized in local/offline fallback mode.");
+    }
+
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
@@ -337,10 +356,11 @@
     let lastStepTime = 0;
     const stepInterval = 130; 
 
-    // فحص المحفوظات فور الفتح
     window.onload = function() {
         let savedName = localStorage.getItem("snake_player_name");
         highScore = localStorage.getItem("snake_high_score") || 0;
+
+        listenToGlobalLeaderboard();
 
         if (savedName) {
             playerName = savedName;
@@ -369,11 +389,56 @@
         initGame();
     }
 
+    function saveScoreToCloud(pName, pScore) {
+        if (database) {
+            database.ref('leaderboard/' + pName).set({
+                name: pName,
+                score: parseInt(pScore)
+            });
+        }
+    }
+
+    function listenToGlobalLeaderboard() {
+        if (database) {
+            database.ref('leaderboard').orderByChild('score').limitToLast(10).on('value', (snapshot) => {
+                const leaderboardList = document.getElementById("leaderboardList");
+                leaderboardList.innerHTML = "";
+                let players = [];
+
+                snapshot.forEach((child) => {
+                    players.push(child.val());
+                });
+
+                players.sort((a, b) => b.score - a.score);
+
+                players.forEach((p, index) => {
+                    const row = document.createElement("div");
+                    row.className = "leaderboard-row";
+                    row.innerHTML = `
+                        <span class="player-name-tag">${index + 1}. ${p.name}</span>
+                        <span class="score-tag">${p.score}</span>
+                    `;
+                    leaderboardList.appendChild(row);
+                });
+            });
+        } else {
+            updateLeaderboardUI();
+        }
+    }
+
     function updateLeaderboardUI() {
         document.getElementById("highScore").innerText = highScore;
         document.getElementById("topPlayerNameDisplay").innerText = playerName || "---";
-        document.getElementById("lbPlayerName").innerText = playerName || "غير محدد";
-        document.getElementById("lbHighScore").innerText = highScore + " نقطة";
+
+        if (!database) {
+            const leaderboardList = document.getElementById("leaderboardList");
+            leaderboardList.innerHTML = `
+                <div class="leaderboard-row">
+                    <span class="player-name-tag">${playerName || 'أنت'}</span>
+                    <span class="score-tag">${highScore}</span>
+                </div>
+            `;
+        }
     }
 
     function easeInOutQuad(t) {
@@ -446,6 +511,7 @@
             if (score > highScore) {
                 highScore = score;
                 localStorage.setItem("snake_high_score", highScore);
+                saveScoreToCloud(playerName, highScore);
                 updateLeaderboardUI();
             }
             spawnFood();
@@ -622,6 +688,8 @@
         cancelAnimationFrame(animationFrameId);
         document.getElementById("finalScoreText").innerText = `${playerName}، نقاطك: ${score}`;
         document.getElementById("gameOverOverlay").classList.add("active");
+        
+        saveScoreToCloud(playerName, highScore);
     }
 
     function resetGame() {
