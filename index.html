@@ -43,24 +43,24 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            max-width: 480px;
+            max-width: 560px;
             margin-bottom: 15px;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
         }
 
         .score-box {
             background: rgba(0, 0, 0, 0.3);
-            padding: 10px 18px;
+            padding: 12px 20px;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         canvas {
             background-color: #0d1b2a;
-            border-radius: 16px;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 0 20px rgba(46, 204, 113, 0.25);
-            border: 2px solid #1b263b;
+            border-radius: 18px;
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8), 0 0 25px rgba(46, 204, 113, 0.25);
+            border: 3px solid #1b263b;
             max-width: 100%;
             height: auto;
         }
@@ -70,9 +70,9 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 10px;
-            width: 220px;
-            height: 220px;
+            gap: 12px;
+            width: 240px;
+            height: 240px;
             margin-top: 15px;
         }
 
@@ -80,8 +80,8 @@
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #ffffff;
-            font-size: 24px;
-            border-radius: 14px;
+            font-size: 26px;
+            border-radius: 16px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -101,8 +101,8 @@
         .btn-down { grid-column: 2; grid-row: 3; }
 
         .controls-hint {
-            margin-top: 10px;
-            font-size: 13px;
+            margin-top: 12px;
+            font-size: 14px;
             color: #a0aab2;
         }
 
@@ -113,7 +113,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.85);
-            border-radius: 16px;
+            border-radius: 18px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -129,9 +129,9 @@
         }
 
         .game-over-title {
-            font-size: 32px;
+            font-size: 36px;
             color: #e74c3c;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-weight: bold;
         }
 
@@ -140,10 +140,10 @@
             background: #2ecc71;
             color: #ffffff;
             border: none;
-            padding: 12px 28px;
-            font-size: 18px;
+            padding: 14px 32px;
+            font-size: 20px;
             font-weight: bold;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             transition: transform 0.2s, background-color 0.2s;
         }
@@ -167,12 +167,12 @@
     </div>
 
     <div class="container-relative">
-        <!-- تم تكبير الملعب إلى 480x480 -->
-        <canvas id="gameCanvas" width="480" height="480"></canvas>
+        <!-- تم تكبير أبعاد الملعب الكلية إلى 560x560 -->
+        <canvas id="gameCanvas" width="560" height="560"></canvas>
         
         <div class="game-over-overlay" id="gameOverOverlay">
             <div class="game-over-title">خسرت!</div>
-            <p id="finalScoreText" style="font-size: 18px;"></p>
+            <p id="finalScoreText" style="font-size: 20px;"></p>
             <button class="restart-btn" onclick="resetGame()">إعادة اللعب</button>
         </div>
     </div>
@@ -192,8 +192,8 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    // تم تكبير حجم المربع إلى 32px لتصبح الدودة والتفاحة أضخم وأوضح
-    const gridSize = 32; 
+    // تم تكبير حجم المربع بشكل ضخم إلى 40px
+    const gridSize = 40; 
     const tileCount = canvas.width / gridSize;
 
     let snake = [];
@@ -213,10 +213,9 @@
     let animationFrameId;
     let lastStepTime = 0;
     
-    // زمن التأخير للخطوة لتوفير سرعة متوازنة مع النعومة الفائقة
-    const stepInterval = 180; 
+    // سرعة الحركة مع الحفاظ على النعومة الفائقة
+    const stepInterval = 170; 
 
-    // دالة النعومة السلسة Smooth Step / Smooth Transition
     function easeInOutQuad(t) {
         return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
     }
@@ -268,7 +267,7 @@
         }
 
         let rawProgress = Math.min(elapsed / stepInterval, 1);
-        let smoothProgress = easeInOutQuad(rawProgress); // انسيابية ناعمة جداً
+        let smoothProgress = easeInOutQuad(rawProgress);
 
         drawGrid();
         drawFood();
@@ -326,8 +325,9 @@
         ctx.fillStyle = "#0d1b2a";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
-        ctx.lineWidth = 1;
+        // خطوط الشبكة المربّعة أصبحت أوضح وأكبر
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+        ctx.lineWidth = 1.5;
         for (let i = 0; i < canvas.width; i += gridSize) {
             ctx.beginPath();
             ctx.moveTo(i, 0);
@@ -354,8 +354,9 @@
             if (isHead) {
                 ctx.fillStyle = "#2ecc71";
                 ctx.shadowColor = "#2ecc71";
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 18;
 
+                // رأس الدودة ضخم
                 ctx.beginPath();
                 ctx.arc(
                     currentX + gridSize / 2, 
@@ -366,35 +367,35 @@
                 );
                 ctx.fill();
 
-                // رسم العيون بشكل أكبر وأوضح
+                // عيون أضخم وأوضح
                 ctx.fillStyle = "#ffffff";
-                let eyeOffsetX = dx * 6;
-                let eyeOffsetY = dy * 6;
+                let eyeOffsetX = dx * 8;
+                let eyeOffsetY = dy * 8;
 
                 ctx.beginPath();
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX + (dy * 4.5), 
-                    currentY + gridSize / 2 + eyeOffsetY + (dx * 4.5), 
-                    3.5, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX + (dy * 6), 
+                    currentY + gridSize / 2 + eyeOffsetY + (dx * 6), 
+                    4.5, 0, 2 * Math.PI
                 );
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX - (dy * 4.5), 
-                    currentY + gridSize / 2 + eyeOffsetY - (dx * 4.5), 
-                    3.5, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX - (dy * 6), 
+                    currentY + gridSize / 2 + eyeOffsetY - (dx * 6), 
+                    4.5, 0, 2 * Math.PI
                 );
                 ctx.fill();
 
                 ctx.fillStyle = "#000000";
                 ctx.beginPath();
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX + (dy * 4.5), 
-                    currentY + gridSize / 2 + eyeOffsetY + (dx * 4.5), 
-                    1.8, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX + (dy * 6), 
+                    currentY + gridSize / 2 + eyeOffsetY + (dx * 6), 
+                    2.2, 0, 2 * Math.PI
                 );
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX - (dy * 4.5), 
-                    currentY + gridSize / 2 + eyeOffsetY - (dx * 4.5), 
-                    1.8, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX - (dy * 6), 
+                    currentY + gridSize / 2 + eyeOffsetY - (dx * 6), 
+                    2.2, 0, 2 * Math.PI
                 );
                 ctx.fill();
 
@@ -425,25 +426,25 @@
 
         ctx.fillStyle = "#e74c3c";
         ctx.shadowColor = "#e74c3c";
-        ctx.shadowBlur = 18;
+        ctx.shadowBlur = 22;
 
-        // رسم التفاحة بشكل أضخم
+        // رسم التفاحة بأبعاد كبيرة للغاية
         ctx.beginPath();
         ctx.arc(centerX, centerY + 1, gridSize / 2 - 3, 0, 2 * Math.PI);
         ctx.fill();
 
-        // غصن التفاحة ورقتها
+        // ساق وساق ورقة التفاحة
         ctx.shadowBlur = 0;
         ctx.strokeStyle = "#795548";
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY - 5);
-        ctx.lineTo(centerX + 4, centerY - 12);
+        ctx.moveTo(centerX, centerY - 6);
+        ctx.lineTo(centerX + 5, centerY - 15);
         ctx.stroke();
 
         ctx.fillStyle = "#2ecc71";
         ctx.beginPath();
-        ctx.arc(centerX + 5, centerY - 9, 3.5, 0, 2 * Math.PI);
+        ctx.arc(centerX + 6, centerY - 11, 4.5, 0, 2 * Math.PI);
         ctx.fill();
 
         ctx.restore();
