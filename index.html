@@ -24,7 +24,7 @@
             padding: 10px;
         }
 
-        /* نافذة الإدخال التي تظهر فور دخول الصفحة */
+        /* نافذة الإدخال الفورية فور فتح اللعبة */
         .welcome-screen {
             position: fixed;
             top: 0;
@@ -110,7 +110,7 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
-            padding: 14px;
+            padding: 16px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
             text-align: center;
             display: flex;
@@ -125,7 +125,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
             padding: 14px;
-            width: 180px;
+            width: 190px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
         }
 
@@ -154,7 +154,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            max-width: 90px;
+            max-width: 100px;
         }
 
         .score-tag {
@@ -162,23 +162,29 @@
             font-weight: bold;
         }
 
+        /* شريط النتيجة العلوي أصلح كبيراً ليتسع لاسم اللاعب */
         .score-board {
             display: flex;
             justify-content: space-between;
             width: 100%;
-            max-width: 440px;
-            margin-bottom: 10px;
-            font-size: 16px;
+            max-width: 560px;
+            margin-bottom: 12px;
+            font-size: 15px;
             font-weight: bold;
+            gap: 10px;
         }
 
         .score-box {
             background: rgba(0, 0, 0, 0.3);
-            padding: 6px 12px;
-            border-radius: 8px;
+            padding: 8px 14px;
+            border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
+        /* تكبير حجم ساحة اللعبة إلى 560x560 لمسافات أكبر */
         canvas {
             background-color: #0d1b2a;
             border-radius: 12px;
@@ -193,9 +199,9 @@
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
             gap: 8px;
-            width: 200px;
-            height: 200px;
-            margin-top: 12px;
+            width: 210px;
+            height: 210px;
+            margin-top: 14px;
         }
 
         .arrow-btn {
@@ -253,7 +259,7 @@
 </head>
 <body>
 
-<!-- شاشة إدخال الاسم الفورية فور الفتح -->
+<!-- شاشة إدخال الاسم الفورية فور فتح اللعبة -->
 <div class="welcome-screen" id="welcomeScreen">
     <div class="welcome-box">
         <div class="welcome-title">مرحباً بك! 🐍</div>
@@ -266,13 +272,18 @@
 <div class="main-layout">
 
     <div class="game-card">
+        <!-- شريط النقاط يُظهر الاسم بجانب أعلى سكور -->
         <div class="score-board">
             <div class="score-box">النقاط: <span id="currentScore" style="color:#2ecc71;">0</span></div>
-            <div class="score-box">أعلى نتيجة: <span id="highScore" style="color:#f1c40f;">0</span></div>
+            <div class="score-box">
+                أعلى سكور (<span id="topPlayerNameDisplay" style="color:#2ecc71;">---</span>): 
+                <span id="highScore" style="color:#f1c40f;">0</span>
+            </div>
         </div>
 
         <div class="container-relative">
-            <canvas id="gameCanvas" width="440" height="440"></canvas>
+            <!-- مساحة اللعبة المكبرة 560x560 -->
+            <canvas id="gameCanvas" width="560" height="560"></canvas>
             
             <div class="modal-overlay" id="gameOverOverlay">
                 <div style="font-size: 22px; color:#e74c3c; font-weight:bold; margin-bottom: 10px;">خسرت!</div>
@@ -304,7 +315,7 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    const gridSize = 32; 
+    const gridSize = 28; 
     const tileCount = canvas.width / gridSize;
 
     let snake = [];
@@ -324,9 +335,9 @@
     let isGameOver = false;
     let animationFrameId;
     let lastStepTime = 0;
-    const stepInterval = 140; 
+    const stepInterval = 130; 
 
-    // التحقق من وجود اسم مسبقاً أو إظهار نافذة الإدخال الفورية
+    // فحص المحفوظات فور الفتح
     window.onload = function() {
         let savedName = localStorage.getItem("snake_player_name");
         highScore = localStorage.getItem("snake_high_score") || 0;
@@ -360,6 +371,7 @@
 
     function updateLeaderboardUI() {
         document.getElementById("highScore").innerText = highScore;
+        document.getElementById("topPlayerNameDisplay").innerText = playerName || "---";
         document.getElementById("lbPlayerName").innerText = playerName || "غير محدد";
         document.getElementById("lbHighScore").innerText = highScore + " نقطة";
     }
@@ -517,33 +529,33 @@
                 ctx.fill();
 
                 ctx.fillStyle = "#ffffff";
-                let eyeOffsetX = dx * 5;
-                let eyeOffsetY = dy * 5;
+                let eyeOffsetX = dx * 4;
+                let eyeOffsetY = dy * 4;
 
                 ctx.beginPath();
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX + (dy * 4), 
-                    currentY + gridSize / 2 + eyeOffsetY + (dx * 4), 
-                    3, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX + (dy * 3), 
+                    currentY + gridSize / 2 + eyeOffsetY + (dx * 3), 
+                    2.8, 0, 2 * Math.PI
                 );
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX - (dy * 4), 
-                    currentY + gridSize / 2 + eyeOffsetY - (dx * 4), 
-                    3, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX - (dy * 3), 
+                    currentY + gridSize / 2 + eyeOffsetY - (dx * 3), 
+                    2.8, 0, 2 * Math.PI
                 );
                 ctx.fill();
 
                 ctx.fillStyle = "#000000";
                 ctx.beginPath();
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX + (dy * 4), 
-                    currentY + gridSize / 2 + eyeOffsetY + (dx * 4), 
-                    1.5, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX + (dy * 3), 
+                    currentY + gridSize / 2 + eyeOffsetY + (dx * 3), 
+                    1.4, 0, 2 * Math.PI
                 );
                 ctx.arc(
-                    currentX + gridSize / 2 + eyeOffsetX - (dy * 4), 
-                    currentY + gridSize / 2 + eyeOffsetY - (dx * 4), 
-                    1.5, 0, 2 * Math.PI
+                    currentX + gridSize / 2 + eyeOffsetX - (dy * 3), 
+                    currentY + gridSize / 2 + eyeOffsetY - (dx * 3), 
+                    1.4, 0, 2 * Math.PI
                 );
                 ctx.fill();
 
@@ -577,20 +589,20 @@
         ctx.shadowBlur = 14;
 
         ctx.beginPath();
-        ctx.arc(centerX, centerY + 1, gridSize / 2 - 2.5, 0, 2 * Math.PI);
+        ctx.arc(centerX, centerY + 1, gridSize / 2 - 2, 0, 2 * Math.PI);
         ctx.fill();
 
         ctx.shadowBlur = 0;
         ctx.strokeStyle = "#795548";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY - 5);
-        ctx.lineTo(centerX + 3, centerY - 10);
+        ctx.moveTo(centerX, centerY - 4);
+        ctx.lineTo(centerX + 3, centerY - 8);
         ctx.stroke();
 
         ctx.fillStyle = "#2ecc71";
         ctx.beginPath();
-        ctx.arc(centerX + 4, centerY - 8, 3, 0, 2 * Math.PI);
+        ctx.arc(centerX + 4, centerY - 6, 2.5, 0, 2 * Math.PI);
         ctx.fill();
 
         ctx.restore();
